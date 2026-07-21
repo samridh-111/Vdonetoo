@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  The reference mockup (reference/ivr-automation-page.html) uses three classes
+  that are never defined in that file: `.minimal-divider`, `.glass-generate-bar`,
+  `.table-row`. They're authored here, inferred from how they're used in the
+  markup (paired with `border`/`border-t`/`border-2` utilities for dividers;
+  a sticky bottom action bar; hoverable table rows).
+*/
+
+.minimal-divider {
+  border-color: theme("colors.outline-variant");
+}
+
+.glass-generate-bar {
+  background: linear-gradient(
+    to top,
+    theme("colors.surface") 40%,
+    color-mix(in srgb, theme("colors.surface") 85%, transparent) 80%,
+    transparent 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid theme("colors.outline-variant");
+}
+
+.table-row {
+  transition: background-color 150ms ease;
+}
+
+.table-row:hover {
+  background-color: rgb(255 255 255 / 0.02);
+}
+
+html,
+body {
+  background-color: theme("colors.surface");
+  color: theme("colors.on-surface");
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+  font-size: 20px;
+  line-height: 1;
+  user-select: none;
+}

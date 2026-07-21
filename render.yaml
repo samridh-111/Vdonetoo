@@ -1,0 +1,123 @@
+# Phase 1 deployment stub. Verify service names/plans against your actual
+# Render account before deploying -- this hasn't been deployed/validated yet.
+services:
+  - type: redis
+    name: ivr-automation-redis
+    plan: starter
+    ipAllowList: []
+
+  - type: web
+    name: ivr-automation-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_DB_URL
+        sync: false
+      - key: SUPABASE_AUDIO_BUCKET
+        value: ivr-audio
+      - key: SUPABASE_BATCH_BUCKET
+        value: ivr-batches
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_MAX_CONCURRENCY
+        value: "8"
+      - key: ELEVENLABS_RATE_PER_MIN
+        value: "60"
+      - key: TRANSLATION_PROVIDER
+        value: openai
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ivr-automation-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: ivr-automation-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: ivr-automation-redis
+          property: connectionString
+
+  - type: worker
+    name: ivr-automation-worker
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile.worker
+    dockerContext: ./backend
+    plan: starter
+    envVars:
+      - fromService:
+          type: web
+          name: ivr-automation-backend
+          envVarKey: ENVIRONMENT
+      - fromService:
+          type: web
+          name: ivr-automation-backend
+          envVarKey: SUPABASE_URL
+      - fromService:
+          type: web
+          name: ivr-automation-backend
+          envVarKey: SUPABASE_SERVICE_ROLE_KEY
+      - fromService:
+          type: web
+          name: ivr-automation-backend
+          envVarKey: SUPABASE_DB_URL
+      - fromService:
+          type: web
+          name: ivr-automation-backend
+          envVarKey: ELEVENLABS_API_KEY
+      - fromService:
+          type: web
+          name: ivr-automation-backend
+          envVarKey: OPENAI_API_KEY
+      - fromService:
+          type: web
+          name: ivr-automation-backend
+          envVarKey: GEMINI_API_KEY
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ivr-automation-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: ivr-automation-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: ivr-automation-redis
+          property: connectionString
+
+  - type: worker
+    name: ivr-automation-beat
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile.worker
+    dockerContext: ./backend
+    dockerCommand: celery -A app.core.celery_app.celery_app beat --loglevel=info
+    plan: starter
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ivr-automation-redis
+          property: connectionString

@@ -1,0 +1,4 @@
+ID,Title,Script,Language,Voice,Notes
+001,Welcome Greeting,"Welcome to Automation Hub support center. Please stay on the line.",English,Professional,
+002,Order Lookup,"Please enter your 10 digit order number followed by the pound key.",English,Friendly,
+003,Agent Transfer,"Connecting you to our next available agent. Thank you for your patience.",English,Professional,

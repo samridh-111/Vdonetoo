@@ -1,0 +1,332 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed": "#e4e1e6",
+                    "on-error-container": "#ffdad6",
+                    "tertiary": "#c8c5cc",
+                    "on-tertiary-fixed": "#1b1b20",
+                    "on-secondary-container": "#b6b4b8",
+                    "primary": "#FF693D",
+                    "surface": "#050505",
+                    "secondary-fixed-dim": "#c8c5ca",
+                    "tertiary-container": "#9a989f",
+                    "surface-tint": "#FF693D",
+                    "on-surface-variant": "#a1a1aa",
+                    "error": "#ffb4ab",
+                    "tertiary-fixed": "#e4e1e8",
+                    "outline": "#27272a",
+                    "outline-variant": "#18181b",
+                    "inverse-primary": "#af3005",
+                    "secondary": "#c8c5ca",
+                    "inverse-on-surface": "#2f3037",
+                    "on-surface": "#fafafa",
+                    "surface-variant": "#09090b",
+                    "on-tertiary-fixed-variant": "#47464c",
+                    "primary-fixed-dim": "#ffb5a0",
+                    "surface-container-highest": "#18181b",
+                    "on-tertiary": "#303035",
+                    "on-error": "#690005",
+                    "on-primary-container": "#ffffff",
+                    "background": "#050505",
+                    "inverse-surface": "#e2e1eb",
+                    "on-primary-fixed-variant": "#872100",
+                    "on-tertiary-container": "#313136",
+                    "primary-container": "#FF693D",
+                    "surface-dim": "#050505",
+                    "secondary-container": "#27272a",
+                    "on-primary": "#000000",
+                    "surface-container-high": "#111111",
+                    "surface-container-lowest": "#050505",
+                    "tertiary-fixed-dim": "#c8c5cc",
+                    "on-secondary-fixed": "#1b1b1e",
+                    "primary-fixed": "#ffdbd1",
+                    "on-primary-fixed": "#3b0900",
+                    "error-container": "#93000a",
+                    "surface-container": "#09090b",
+                    "surface-bright": "#111111",
+                    "on-secondary-fixed-variant": "#47464a",
+                    "on-background": "#fafafa",
+                    "surface-container-low": "#09090b",
+                    "on-secondary": "#303033"
+            },
+            "borderRadius": {
+                    "DEFAULT": "4px",
+                    "lg": "6px",
+                    "xl": "8px",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "16px",
+                    "gutter": "24px",
+                    "xs": "8px",
+                    "base": "4px",
+                    "md": "24px",
+                    "lg": "40px",
+                    "xl": "64px",
+                    "margin": "32px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "title-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "title-md": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    }catch(_e){}</script></head><body class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen z-40 w-64 border-r minimal-divider flex flex-col bg-surface">
+    <div class="px-gutter py-md">
+        <h1 class="font-title-md text-title-md font-bold tracking-tight text-on-surface">Automation Hub</h1>
+    </div>
+    <nav class="flex-1 px-3 space-y-1">
+        <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface transition-colors rounded-lg group" href="#">
+            <span class="material-symbols-outlined" data-original-icon="dashboard">dashboard</span>
+            <span class="font-body-sm">Dashboard</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface transition-colors rounded-lg group" href="#">
+            <span class="material-symbols-outlined">auto_awesome</span>
+            <span class="font-body-sm">Creative Automation</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-on-surface bg-white/5 border border-white/5 rounded-lg font-medium" href="#">
+            <span class="material-symbols-outlined text-primary">settings_phone</span>
+            <span class="font-body-sm">IVR Automation</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface transition-colors rounded-lg" href="#">
+            <span class="material-symbols-outlined">folder_open</span>
+            <span class="font-body-sm">Asset Library</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface transition-colors rounded-lg" href="#">
+            <span class="material-symbols-outlined">tactic</span>
+            <span class="font-body-sm">Projects</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface transition-colors rounded-lg" href="#">
+            <span class="material-symbols-outlined">history</span>
+            <span class="font-body-sm">History</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface transition-colors rounded-lg" href="#">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="font-body-sm">Settings</span>
+        </a>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 ml-64 min-h-screen flex flex-col relative pb-32">
+    <!-- TopAppBar -->
+    <header class="h-16 flex justify-between items-center px-gutter border-b minimal-divider bg-surface/50 backdrop-blur-md sticky top-0 z-30">
+        <div class="flex items-center flex-1">
+            <div class="relative w-80">
+                <span class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 text-on-surface-variant/50">search</span>
+
+            </div>
+        </div>
+        <div class="flex items-center gap-sm">
+            <button class="p-1 text-on-surface-variant hover:text-on-surface transition-colors">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <div class="w-7 h-7 rounded-full bg-surface-container-high border minimal-divider flex items-center justify-center overflow-hidden">
+                <img class="w-full h-full object-cover grayscale contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6zhw1G1npgdSEunBlMmZrVncmvljvzHwDfYenNJzIZgmR2s4UJo44iUPFannDrzP0Xx7Dd9VRkXQ1yPsGoudQpS-PSCI08rzpzMXurvUEC9eMGlhhK-5LcI40XvRQ3xI7AsQrI799nhoKx81rmOkg0mQru9OcVwgcHzatQUsCRlxcOY1kQPkijOsZgwj4-xhZQ9bir77UEDlk6wyMqFeoYW5CEV3MCKXHkuYhS2362iPEGsnCwXLJ">
+            </div>
+        </div>
+    </header>
+
+    <div class="p-gutter max-w-7xl mx-auto w-full space-y-xl">
+        <!-- Page Header -->
+        <div class="flex justify-between items-start">
+            <div>
+                <h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-1">IVR Automation</h2>
+                <p class="font-body-lg text-on-surface-variant opacity-60">Configure and generate multi-lingual AI responses.</p>
+            </div>
+            <button class="px-3 py-1.5 rounded bg-surface-container-high border minimal-divider text-on-surface text-body-sm font-medium flex items-center gap-2 hover:bg-surface-variant transition-colors">
+                <span class="material-symbols-outlined !text-[18px]">download</span>
+                Download Template
+            </button>
+        </div>
+
+        <div class="grid grid-cols-12 gap-xl">
+            <!-- Left Column -->
+            <div class="col-span-12 lg:col-span-8 space-y-xl">
+                <!-- Integrated Upload -->
+                <section>
+                    <div class="group border-2 border-dashed minimal-divider rounded-xl py-xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-white/20 hover:bg-white/[0.01] transition-all">
+                        <div class="w-10 h-10 rounded-lg bg-surface-container-high border minimal-divider flex items-center justify-center mb-md group-hover:bg-surface-container-highest transition-colors">
+                            <span class="material-symbols-outlined text-on-surface-variant">upload</span>
+                        </div>
+                        <h3 class="text-body-sm font-medium text-on-surface mb-1">Upload script sheet</h3>
+                        <p class="text-xs text-on-surface-variant/50">Drop .xlsx or .csv files here</p>
+                    </div>
+                </section>
+
+                <!-- Batch Preview Table -->
+                <section class="space-y-md">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-title-md font-medium text-on-surface">Batch Preview</h3>
+                        <span class="flex items-center gap-2 text-xs font-medium text-on-surface-variant/60 uppercase tracking-widest">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                            Ready
+                        </span>
+                    </div>
+                    <div class="border-t minimal-divider overflow-hidden">
+                        <table class="w-full text-left font-body-sm">
+                            <thead class="text-on-surface-variant/40 border-b minimal-divider">
+                                <tr>
+                                    <th class="py-4 font-medium uppercase tracking-tighter text-[11px]">ID</th>
+                                    <th class="py-4 font-medium uppercase tracking-tighter text-[11px]">Script Text</th>
+                                    <th class="py-4 font-medium uppercase tracking-tighter text-[11px] text-center">Languages</th>
+                                    <th class="py-4 font-medium uppercase tracking-tighter text-[11px] text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y minimal-divider">
+                                <tr class="table-row group">
+                                    <td class="py-4 text-on-surface-variant/60 font-mono text-xs">#001</td>
+                                    <td class="py-4 text-on-surface">Welcome to Automation Hub support center...</td>
+                                    <td class="py-4">
+                                        <div class="flex justify-center gap-1.5">
+                                            <span class="text-[10px] font-bold text-on-surface-variant/40 border minimal-divider px-1.5 py-0.5 rounded">EN</span>
+                                            <span class="text-[10px] font-bold text-on-surface-variant/40 border minimal-divider px-1.5 py-0.5 rounded">HI</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-right">
+                                        <span class="text-primary text-[10px] font-bold uppercase tracking-wider">Valid</span>
+                                    </td>
+                                </tr>
+                                <tr class="table-row group">
+                                    <td class="py-4 text-on-surface-variant/60 font-mono text-xs">#002</td>
+                                    <td class="py-4 text-on-surface">Please enter your 10 digit order number...</td>
+                                    <td class="py-4">
+                                        <div class="flex justify-center gap-1.5">
+                                            <span class="text-[10px] font-bold text-on-surface-variant/40 border minimal-divider px-1.5 py-0.5 rounded">EN</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-right">
+                                        <span class="text-primary text-[10px] font-bold uppercase tracking-wider">Valid</span>
+                                    </td>
+                                </tr>
+                                <tr class="table-row group">
+                                    <td class="py-4 text-on-surface-variant/60 font-mono text-xs">#003</td>
+                                    <td class="py-4 text-on-surface/40">Connecting you to our next available agent...</td>
+                                    <td class="py-4">
+                                        <div class="flex justify-center gap-1.5">
+                                            <span class="text-[10px] font-bold text-on-surface-variant/40 border minimal-divider px-1.5 py-0.5 rounded">EN</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-right">
+                                        <span class="text-error text-[10px] font-bold uppercase tracking-wider">Error</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column Controls -->
+            <div class="col-span-12 lg:col-span-4 space-y-xl">
+                <!-- Minimal Voice Selection -->
+                <section class="space-y-md">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-title-md font-medium text-on-surface">Voice Selection</h3>
+                        <button class="text-xs text-on-surface-variant/50 hover:text-primary transition-colors">See all</button>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3 p-2 rounded-lg bg-white/[0.03] border minimal-divider group">
+                            <img class="w-8 h-8 rounded bg-surface-container-high object-cover grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvukO2FEVfoKAEPZAWnIp3FFkKDcItqFjbqEg1sObeI7Glb3kgsyDNbvajHEVw4Hv7QqJR6WLyAHUgTmUcxCGtCIgyYEqrQhtLpwqZZOpLyuMRSomg7vY_zVg_Kl4YGZifLPt6rNhSY-XPpjcotnpxnsAbYxxsIcq8g1Z8T3TA7_TAiAvSXba8P_JsyXEJlhYW68jBhvSJ6U_uMB3wjalt7KbMs9jq5l1ssfPsrimwU-ZqXuAGJSix">
+                            <div class="flex-1">
+                                <h4 class="text-body-sm font-medium text-on-surface">Aria Premium</h4>
+                                <p class="text-[11px] text-on-surface-variant/50">Natural Conversational</p>
+                            </div>
+                            <span class="material-symbols-outlined text-on-surface-variant/30 group-hover:text-primary cursor-pointer">play_circle</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/[0.02] border border-transparent transition-colors group">
+                            <img class="w-8 h-8 rounded bg-surface-container-high object-cover grayscale opacity-40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwXzp70Cp049Fa3hnY1fwX4yQ3y5K6Jf8uORnqeTbijbgMArfiHUM3M-igsaLDMUgD6xH83oaPIsuBRp2-DJF6ceUXuQrZ7KHQvmO_Qgy-SHl288fHoWsqlgLZVIp_MsTBI1xwumQYDRqlrl1ncKNzLnpa080jGFEuJ67Kz4XkCIhyX45EU-yKq36kgPvV1AhaxW3mMjnELYnB-A4kMWmntMPBrcNCB8mo93u529Pr1Knt4-ClH7vX">
+                            <div class="flex-1">
+                                <h4 class="text-body-sm font-medium text-on-surface-variant/60">Mark Standard</h4>
+                                <p class="text-[11px] text-on-surface-variant/30">Formal, Clear</p>
+                            </div>
+                            <span class="material-symbols-outlined text-on-surface-variant/20 group-hover:text-primary cursor-pointer">play_circle</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Minimal Language Mapping -->
+                <section class="space-y-md">
+                    <h3 class="text-title-md font-medium text-on-surface">Language Mapping</h3>
+                    <div class="space-y-0.5">
+                        <div class="flex items-center justify-between py-1.5 text-body-sm">
+                            <span class="text-on-surface-variant/60">Hindi (India)</span>
+                            <span class="text-on-surface-variant/40">Auto</span>
+                        </div>
+                        <div class="flex items-center justify-between py-1.5 text-body-sm border-t minimal-divider">
+                            <span class="text-on-surface-variant/60">Tamil (India)</span>
+                            <span class="text-on-surface font-medium">Mapped</span>
+                        </div>
+                        <div class="flex items-center justify-between py-1.5 text-body-sm border-t minimal-divider">
+                            <span class="text-on-surface-variant/60">Kannada (India)</span>
+                            <span class="text-primary font-medium">Required</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Summary Stats -->
+                <section class="pt-xl space-y-md border-t minimal-divider">
+                    <div class="grid grid-cols-2 gap-md">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-on-surface-variant/40 font-bold mb-1">Total Scripts</p>
+                            <p class="text-2xl font-light text-on-surface">1,240</p>
+                        </div>
+                        <div class="">
+                            <p class="text-[10px] uppercase tracking-widest text-on-surface-variant/40 font-bold mb-1">Languages</p>
+                            <p class="text-2xl font-light text-on-surface">04</p>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-on-surface-variant/50">Estimated processing time: <span class="text-on-surface">12 minutes</span></p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Bar -->
+    <div class="fixed bottom-0 right-0 w-[calc(100%-16rem)] p-gutter glass-generate-bar z-40">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-md text-xs text-on-surface-variant/60">
+
+                <span class="w-1 h-1 rounded-full bg-white/10"></span>
+
+            </div>
+            <button class="bg-primary text-on-primary-container px-8 py-2.5 rounded-lg font-bold text-body-sm flex items-center gap-3 hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/10 tracking-tight">
+                GENERATE IVRS
+                <span class="material-symbols-outlined !text-sm">bolt</span>
+            </button>
+        </div>
+    </div>
+</main>
+
+<script class="">
+    // Micro-interactions
+    document.querySelectorAll('.material-symbols-outlined').forEach(icon => {
+        if(icon.innerText === 'play_circle' || icon.innerText === 'pause_circle') {
+            icon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isPlaying = this.innerText === 'pause_circle';
+                this.innerText = isPlaying ? 'play_circle' : 'pause_circle';
+            });
+        }
+    });
+</script></body></html>
