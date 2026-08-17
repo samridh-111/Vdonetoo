@@ -8,12 +8,16 @@ if [ -z "${SUPABASE_DB_URL:-}" ]; then
   exit 1
 fi
 
+# The app needs the `+asyncpg` driver suffix (postgresql+asyncpg://); psql
+# only understands the plain postgresql:// scheme, so strip it here.
+PSQL_URL="${SUPABASE_DB_URL/postgresql+asyncpg:\/\//postgresql://}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MIGRATIONS_DIR="$SCRIPT_DIR/migrations"
 
 for f in "$MIGRATIONS_DIR"/*.sql; do
   echo "Applying $(basename "$f")..."
-  psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "$f"
+  psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f "$f"
 done
 
 echo "All migrations applied."

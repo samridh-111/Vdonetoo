@@ -14,6 +14,7 @@ from app.domain.interfaces.repositories import (
     JobRepository,
     LogRepository,
     ScriptRepository,
+    TranslationRepository,
     VoiceRepository,
 )
 from app.domain.interfaces.storage_provider import StorageProvider
@@ -42,6 +43,7 @@ class ZipService:
         script_repository: ScriptRepository,
         job_repository: JobRepository,
         audio_file_repository: AudioFileRepository,
+        translation_repository: TranslationRepository,
         log_repository: LogRepository,
         voice_repository: VoiceRepository,
         storage_provider: StorageProvider,
@@ -52,6 +54,7 @@ class ZipService:
         self._scripts = script_repository
         self._jobs = job_repository
         self._audio_files = audio_file_repository
+        self._translations = translation_repository
         self._logs = log_repository
         self._voices = voice_repository
         self._storage = storage_provider
@@ -64,6 +67,9 @@ class ZipService:
         jobs = await self._jobs.list_by_batch(batch_id)
         audio_by_job_id = {a.job_id: a for a in await self._audio_files.list_by_batch(batch_id)}
         logs = await self._logs.list_by_batch(batch_id)
+
+        translation_ids = [job.translation_id for job in jobs if job.translation_id is not None]
+        translations_by_id = {t.id: t for t in await self._translations.list_by_ids(translation_ids)}
 
         voice_cache: dict[uuid.UUID, VoiceEntity | None] = {}
 
@@ -95,11 +101,13 @@ class ZipService:
                     audio_bytes = await self._storage.download(self._audio_bucket, audio.storage_path)
                     (lang_dir / filename).write_bytes(audio_bytes)
 
+                translation = translations_by_id.get(job.translation_id) if job.translation_id else None
+
                 metadata_rows.append(
                     {
                         "Script ID": (script.external_id or str(script.id)) if script else "",
                         "Original Text": script.script_text if script else "",
-                        "Translated Text": "" if job.translation_id is None else "(see translations)",
+                        "Translated Text": (translation.translated_text or "") if translation else "",
                         "Language": job.language_code,
                         "Voice": voice.name if voice else "",
                         "Duration": f"{audio.duration_seconds:.2f}" if audio and audio.duration_seconds else "",

@@ -5,8 +5,9 @@ _SYSTEM_INSTRUCTION = (
     "You are a professional translator for an IVR (Interactive Voice "
     "Response) phone system. Translate the given script text from "
     "{source_language} to {target_language}. Preserve the tone, meaning, "
-    "and intent exactly as it would be spoken aloud to a caller. Respond "
-    "with only the translation itself -- no explanations, no quotation "
+    "and intent exactly as it would be spoken aloud to a caller. Output "
+    "ONLY the single best translation as plain text -- no markdown, no "
+    "bullet points, no alternative options, no explanations, no quotation "
     "marks."
 )
 

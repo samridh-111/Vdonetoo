@@ -3,6 +3,7 @@ import pytest
 from app.core.config import get_settings
 from app.providers.translation.factory import get_translation_provider
 from app.providers.translation.gemini_provider import GeminiTranslationProvider
+from app.providers.translation.mymemory_provider import MyMemoryTranslationProvider
 from app.providers.translation.openai_provider import OpenAITranslationProvider
 
 
@@ -29,6 +30,14 @@ def test_factory_returns_gemini_provider(monkeypatch: pytest.MonkeyPatch) -> Non
     provider = get_translation_provider("gemini")
 
     assert isinstance(provider, GeminiTranslationProvider)
+
+
+def test_factory_returns_mymemory_provider() -> None:
+    get_settings.cache_clear()
+
+    provider = get_translation_provider("mymemory")
+
+    assert isinstance(provider, MyMemoryTranslationProvider)
 
 
 def test_factory_caches_provider_instance(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -1,9 +1,12 @@
-import asyncio
 import uuid
+from datetime import UTC, datetime
 from typing import Any
 
 from app.core.celery_app import celery_app
+from app.core.config import get_settings
 from app.core.db import new_worker_session
+from app.core.rate_limiter import wait_for_token
+from app.core.redis_client import get_sync_redis
 from app.repositories import (
     SqlBatchRepository,
     SqlJobRepository,
@@ -18,6 +21,7 @@ from app.workers.factories import (
     build_voice_resolution_service,
     get_translation_provider,
 )
+from app.workers.loop import run_async
 from app.workers.progress import publish_progress
 
 MAX_PREPARE_ATTEMPTS = 3
@@ -50,11 +54,11 @@ def _resolve_target_languages(
 )
 def prepare_script(self: Any, script_id: str) -> dict[str, Any]:
     try:
-        return asyncio.run(_prepare_script_async(script_id))
+        return run_async(_prepare_script_async(script_id))
     except Exception as exc:  # noqa: BLE001 -- deliberately broad: any failure here must not crash the chord
         if self.request.retries < self.max_retries:
             raise self.retry(exc=exc, countdown=5 * (self.request.retries + 1)) from exc
-        asyncio.run(_mark_script_failed_async(script_id, str(exc)))
+        run_async(_mark_script_failed_async(script_id, str(exc)))
         return {"script_id": script_id, "status": "failed", "error": str(exc)}
 
 
@@ -115,6 +119,12 @@ async def _prepare_script_async(script_id: str) -> dict[str, Any]:
 
         job_rows: list[dict[str, Any]] = []
         for target_code in target_codes:
+            voice = await voice_service.resolve(
+                voice_hint=script.source_voice_preset,
+                default_voice_map=batch.default_voice_map,
+                language_code=target_code,
+            )
+
             if target_code == detected_code:
                 translation = await translation_repo.create(
                     script_id=script_uuid,
@@ -124,54 +134,76 @@ async def _prepare_script_async(script_id: str) -> dict[str, Any]:
                     translated_text=script.script_text,
                     status="completed",
                 )
-            else:
-                try:
-                    translated_text = await translation_service.translate(
-                        provider, script.script_text, detected_code, target_code
-                    )
-                    translation = await translation_repo.create(
-                        script_id=script_uuid,
-                        source_language_code=detected_code,
-                        target_language_code=target_code,
-                        provider=batch.translation_provider,
-                        translated_text=translated_text,
-                        status="completed",
-                    )
-                except Exception as exc:  # noqa: BLE001 -- one language's translation failure must not sink the others
-                    await translation_repo.create(
-                        script_id=script_uuid,
-                        source_language_code=detected_code,
-                        target_language_code=target_code,
-                        provider=batch.translation_provider,
-                        translated_text=None,
-                        status="failed",
-                        error_message=str(exc),
-                    )
-                    await log_repo.create(
-                        batch.id,
-                        f"Translation to {target_code} failed for script #{script.row_index}: {exc}",
-                        level="error",
-                        script_id=script_uuid,
-                    )
-                    continue
+                job_rows.append(
+                    {
+                        "batch_id": batch.id,
+                        "script_id": script_uuid,
+                        "translation_id": translation.id,
+                        "language_code": target_code,
+                        "voice_id": voice.id if voice else None,
+                        "stage": "queued",
+                    }
+                )
+                continue
 
-            voice = await voice_service.resolve(
-                voice_hint=script.source_voice_preset,
-                default_voice_map=batch.default_voice_map,
-                language_code=target_code,
-            )
-            job_rows.append(
-                {
-                    "batch_id": batch.id,
-                    "script_id": script_uuid,
-                    "translation_id": translation.id,
-                    "language_code": target_code,
-                    "voice_id": voice.id if voice else None,
-                    "stage": "queued",
-                }
-            )
+            try:
+                settings = get_settings()
+                await wait_for_token(get_sync_redis(), "translation", settings.translation_max_concurrency)
+                translated_text = await translation_service.translate(
+                    provider, script.script_text, detected_code, target_code
+                )
+                translation = await translation_repo.create(
+                    script_id=script_uuid,
+                    source_language_code=detected_code,
+                    target_language_code=target_code,
+                    provider=batch.translation_provider,
+                    translated_text=translated_text,
+                    status="completed",
+                )
+                job_rows.append(
+                    {
+                        "batch_id": batch.id,
+                        "script_id": script_uuid,
+                        "translation_id": translation.id,
+                        "language_code": target_code,
+                        "voice_id": voice.id if voice else None,
+                        "stage": "queued",
+                    }
+                )
+            except Exception as exc:  # noqa: BLE001 -- one language's translation failure must not sink the others
+                translation = await translation_repo.create(
+                    script_id=script_uuid,
+                    source_language_code=detected_code,
+                    target_language_code=target_code,
+                    provider=batch.translation_provider,
+                    translated_text=None,
+                    status="failed",
+                    error_message=str(exc),
+                )
+                await log_repo.create(
+                    batch.id,
+                    f"Translation to {target_code} failed for script #{script.row_index}: {exc}",
+                    level="error",
+                    script_id=script_uuid,
+                )
+                # A job row is still created (stage='failed') rather than
+                # omitted entirely -- otherwise a failed translation just
+                # silently vanishes from the batch preview/ZIP with no
+                # visible trace of what went wrong.
+                job_rows.append(
+                    {
+                        "batch_id": batch.id,
+                        "script_id": script_uuid,
+                        "translation_id": translation.id,
+                        "language_code": target_code,
+                        "voice_id": voice.id if voice else None,
+                        "stage": "failed",
+                        "error_message": str(exc),
+                        "completed_at": datetime.now(UTC),
+                    }
+                )
 
-        if not job_rows:
+        if not job_rows or all(row["stage"] == "failed" for row in job_rows):
             await script_repo.update(
                 script_uuid, status="failed", error_message="No target languages could be prepared."
             )
@@ -181,6 +213,7 @@ async def _prepare_script_async(script_id: str) -> dict[str, Any]:
                 level="error",
                 script_id=script_uuid,
             )
+            await job_repo.bulk_create(job_rows)  # persist the failed job rows too, for visibility
             publish_progress(batch.id, "script_stage_changed", {"script_id": script_id, "status": "failed"})
             return {"script_id": script_id, "status": "failed"}
 

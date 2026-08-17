@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from sqlalchemy import update
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities import TranslationEntity
@@ -36,6 +36,12 @@ class SqlTranslationRepository:
     async def get(self, translation_id: uuid.UUID) -> TranslationEntity | None:
         row = await self._session.get(Translation, translation_id)
         return _to_entity(row) if row else None
+
+    async def list_by_ids(self, translation_ids: list[uuid.UUID]) -> list[TranslationEntity]:
+        if not translation_ids:
+            return []
+        result = await self._session.execute(select(Translation).where(Translation.id.in_(translation_ids)))
+        return [_to_entity(row) for row in result.scalars().all()]
 
     async def update(self, translation_id: uuid.UUID, **fields: Any) -> None:
         await self._session.execute(

@@ -12,7 +12,11 @@ _SYSTEM_PROMPT = (
 
 class OpenAITranslationProvider:
     def __init__(self, api_key: str, model: str) -> None:
-        self._client = AsyncOpenAI(api_key=api_key)
+        # A batch fans out one translation call per script concurrently, so
+        # even a handful of scripts can burst past a low-tier account's
+        # requests-per-minute limit. The SDK's built-in retry/backoff
+        # (default max_retries=2) isn't enough to ride that out; bump it.
+        self._client = AsyncOpenAI(api_key=api_key, max_retries=6)
         self._model = model
 
     async def translate(self, text: str, source_language: str, target_language: str) -> str:

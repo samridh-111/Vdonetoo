@@ -12,13 +12,19 @@ from app.domain.interfaces.repositories import (
     ScriptRepository,
 )
 from app.domain.interfaces.storage_provider import StorageProvider
-from app.schemas.batch import BatchCreateRequest, BatchDetail, BatchStatusOut
+from app.schemas.batch import BatchCreateRequest, BatchDetail, BatchEstimateResponse, BatchStatusOut
 from app.schemas.script import JobOut, ScriptOut
 from app.services.pipeline_orchestrator import PipelineOrchestrator
 from app.services.upload_service import UploadService
 
 _DEFAULT_PROJECT_NAME = "IVR Automation"
 _DEFAULT_PROJECT_MODULE = "ivr_automation"
+
+# Used only until enough real jobs have completed to compute a historical
+# average -- roughly matches translate + TTS + upload latency observed in
+# practice, not a fabricated number pretending to be measured data (the
+# response's `based_on_historical_data` flag tells the caller which one it got).
+_FALLBACK_MS_PER_JOB = 4000.0
 
 
 class BatchNotFoundError(Exception):
@@ -41,6 +47,8 @@ class BatchService:
         orchestrator: PipelineOrchestrator,
         storage_provider: StorageProvider,
         batch_bucket: str,
+        default_translation_provider: str,
+        elevenlabs_max_concurrency: int,
     ) -> None:
         self._projects = project_repository
         self._batches = batch_repository
@@ -51,6 +59,8 @@ class BatchService:
         self._orchestrator = orchestrator
         self._storage = storage_provider
         self._batch_bucket = batch_bucket
+        self._default_translation_provider = default_translation_provider
+        self._elevenlabs_max_concurrency = elevenlabs_max_concurrency
 
     async def create_batch(self, redis: Redis, request: BatchCreateRequest) -> BatchEntity:
         stash = await self._upload_service.unstash(redis, request.upload_token)
@@ -66,7 +76,11 @@ class BatchService:
             source_url=stash.source_url,
             translation_mode=request.translation_mode.value,
             target_languages=request.target_languages,
-            translation_provider=request.translation_provider.value,
+            translation_provider=(
+                request.translation_provider.value
+                if request.translation_provider is not None
+                else self._default_translation_provider
+            ),
             default_voice_map=request.default_voice_map,
             status="draft",
             concurrency_limit=request.concurrency_limit,
@@ -173,6 +187,24 @@ class BatchService:
         if not batch.zip_storage_path:
             raise BatchStateError("This batch's ZIP isn't ready yet.")
         return await self._storage.get_signed_url(self._batch_bucket, batch.zip_storage_path)
+
+    async def estimate(self, script_count: int, language_count: int) -> BatchEstimateResponse:
+        total_jobs = max(script_count, 0) * max(language_count, 1)
+        average_ms = await self._audio_files.average_generation_time_ms()
+        based_on_historical_data = average_ms is not None
+        ms_per_job = average_ms if average_ms is not None else _FALLBACK_MS_PER_JOB
+
+        # Jobs run concurrently up to the ElevenLabs concurrency ceiling, so
+        # wall-clock time is roughly total work divided by how much of it
+        # happens in parallel -- not a naive per-job sum.
+        parallel_batches = max(1, -(-total_jobs // max(self._elevenlabs_max_concurrency, 1)))
+        estimated_seconds = round((ms_per_job / 1000) * parallel_batches, 1)
+
+        return BatchEstimateResponse(
+            total_jobs=total_jobs,
+            estimated_seconds=estimated_seconds,
+            based_on_historical_data=based_on_historical_data,
+        )
 
     async def _require_batch(self, batch_id: uuid.UUID) -> BatchEntity:
         batch = await self._batches.get(batch_id)

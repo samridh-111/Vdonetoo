@@ -47,7 +47,7 @@ def _reset_process_local_singletons(**_kwargs: object) -> None:
     build its own engine/session-factory/Redis client on first use."""
     from app.core import db, redis_client
     from app.providers.translation import factory as translation_factory
-    from app.workers import factories
+    from app.workers import factories, loop
 
     db.get_engine.cache_clear()
     db.get_session_factory.cache_clear()
@@ -56,6 +56,7 @@ def _reset_process_local_singletons(**_kwargs: object) -> None:
     factories.get_storage_provider.cache_clear()
     factories.get_voice_provider.cache_clear()
     translation_factory.get_translation_provider.cache_clear()
+    loop.reset_worker_loop()
 
 
 @beat_init.connect

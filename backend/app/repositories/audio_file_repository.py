@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities import AudioFileEntity
@@ -39,3 +39,17 @@ class SqlAudioFileRepository:
     async def list_by_batch(self, batch_id: uuid.UUID) -> list[AudioFileEntity]:
         result = await self._session.execute(select(AudioFile).where(AudioFile.batch_id == batch_id))
         return [_to_entity(row) for row in result.scalars().all()]
+
+    async def average_generation_time_ms(self, sample_size: int = 50) -> float | None:
+        recent_ids_subquery = (
+            select(AudioFile.id)
+            .where(AudioFile.generation_time_ms.is_not(None))
+            .order_by(AudioFile.created_at.desc())
+            .limit(sample_size)
+            .subquery()
+        )
+        result = await self._session.execute(
+            select(func.avg(AudioFile.generation_time_ms)).where(AudioFile.id.in_(select(recent_ids_subquery.c.id)))
+        )
+        average = result.scalar_one_or_none()
+        return float(average) if average is not None else None

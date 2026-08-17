@@ -19,6 +19,7 @@ from app.repositories import (
     SqlLanguageRepository,
     SqlLogRepository,
     SqlScriptRepository,
+    SqlTranslationRepository,
     SqlVoiceRepository,
 )
 from app.services.language_detection_service import LanguageDetectionService
@@ -60,6 +61,7 @@ def build_zip_service(session: AsyncSession) -> ZipService:
         script_repository=SqlScriptRepository(session),
         job_repository=SqlJobRepository(session),
         audio_file_repository=SqlAudioFileRepository(session),
+        translation_repository=SqlTranslationRepository(session),
         log_repository=SqlLogRepository(session),
         voice_repository=SqlVoiceRepository(session),
         storage_provider=get_storage_provider(),

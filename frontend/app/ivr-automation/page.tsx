@@ -15,6 +15,8 @@ import { useCreateBatch } from "@/lib/hooks/useCreateBatch";
 import { useStartBatch } from "@/lib/hooks/useStartBatch";
 import { useBatchStatus } from "@/lib/hooks/useBatchStatus";
 import { useBatchWebSocket } from "@/lib/hooks/useBatchWebSocket";
+import { useBatchEstimate } from "@/lib/hooks/useBatchEstimate";
+import { useLanguages } from "@/lib/hooks/useLanguages";
 import { getDownloadUrl } from "@/lib/api/batch";
 import { showToast } from "@/lib/notifications/toast";
 import { ensureNotificationPermission, sendDesktopNotification } from "@/lib/notifications/desktopNotify";
@@ -40,6 +42,15 @@ export default function IvrAutomationPage() {
   const isProcessing = Boolean(batchId);
   const { data: status } = useBatchStatus(batchId, isProcessing);
   useBatchWebSocket(batchId, isProcessing);
+
+  const { data: languages = [] } = useLanguages();
+  const estimateLanguageCount =
+    translationMode === "translate_everything"
+      ? languages.length || 1
+      : translationMode === "keep_original"
+        ? 1
+        : targetLanguages.length || 1;
+  const { data: estimate } = useBatchEstimate(previewRows.length, estimateLanguageCount, !isProcessing);
 
   function applyUploadResult(result: UploadResponse) {
     setUploadToken(result.upload_token);
@@ -109,7 +120,6 @@ export default function IvrAutomationPage() {
         name: batchName,
         translation_mode: translationMode,
         target_languages: targetLanguages,
-        translation_provider: "openai",
         default_voice_map: defaultVoiceMap,
       });
 
@@ -165,9 +175,30 @@ export default function IvrAutomationPage() {
     : previewRows;
 
   const totalScripts = status?.total_scripts || previewRows.length;
-  const languageCount = new Set(displayRows.flatMap((row) => row.languages)).size;
-  const estimatedMinutes =
+  // Before a batch exists, the "Languages" count must reflect the current
+  // mode/checkbox selection (estimateLanguageCount) -- displayRows at that
+  // point only carries each script's *detected source* language, which has
+  // nothing to do with which target languages are selected, so it never
+  // changed when languages were picked. Once the batch is running/done,
+  // show the actual realized output languages from real jobs instead.
+  const languageCount = isProcessing
+    ? new Set(displayRows.flatMap((row) => row.languages)).size
+    : estimateLanguageCount;
+
+  // Prefer the live in-progress ETA (based on this batch's own completed
+  // jobs so far) whenever it's available; it only becomes available once
+  // at least one job has finished, though, so fall back to the
+  // pre-generation estimate the rest of the time -- including while
+  // processing but before the first job completes. React Query keeps
+  // `estimate` frozen at its last fetched value once the query is disabled
+  // (batch started), so this fallback stays valid throughout the run
+  // instead of blanking out to "--" the instant Generate is clicked.
+  const liveEtaMinutes =
     status?.estimated_seconds_remaining != null ? Math.max(1, Math.round(status.estimated_seconds_remaining / 60)) : null;
+  const preGenerationEtaMinutes =
+    estimate?.estimated_seconds != null ? Math.max(1, Math.round(estimate.estimated_seconds / 60)) : null;
+  const estimatedMinutes = liveEtaMinutes ?? preGenerationEtaMinutes;
+  const estimateIsApproximate = liveEtaMinutes == null && estimate?.based_on_historical_data === false;
 
   const isGenerating =
     isProcessing && status !== undefined && !["completed", "failed", "cancelled"].includes(status.status);
@@ -249,7 +280,12 @@ export default function IvrAutomationPage() {
                 selectedLanguages={targetLanguages}
                 onToggleLanguage={toggleLanguage}
               />
-              <SummaryStats totalScripts={totalScripts} languageCount={languageCount} estimatedMinutes={estimatedMinutes} />
+              <SummaryStats
+                totalScripts={totalScripts}
+                languageCount={languageCount}
+                estimatedMinutes={estimatedMinutes}
+                estimateIsApproximate={estimateIsApproximate}
+              />
             </div>
           </div>
         </div>

@@ -21,6 +21,7 @@ class TranslationMode(StrEnum):
 class TranslationProviderName(StrEnum):
     OPENAI = "openai"
     GEMINI = "gemini"
+    MYMEMORY = "mymemory"
 
 
 class BatchStatusName(StrEnum):
@@ -37,7 +38,11 @@ class BatchCreateRequest(BaseModel):
     name: str
     translation_mode: TranslationMode
     target_languages: list[str] = Field(default_factory=list)
-    translation_provider: TranslationProviderName = TranslationProviderName.OPENAI
+    # None (not sent) means "use whatever TRANSLATION_PROVIDER is configured
+    # in the backend's .env" -- there's no UI picker for this yet, so the
+    # frontend must never hardcode a provider here (it did, which is why
+    # switching the backend to Gemini had no effect until this was fixed).
+    translation_provider: TranslationProviderName | None = None
     default_voice_map: dict[str, str] = Field(default_factory=dict, description="language_code -> voice preset_key or id")
     concurrency_limit: int = 8
 
@@ -82,3 +87,9 @@ class BatchStatusOut(BaseModel):
     percent_complete: float
     estimated_seconds_remaining: float | None
     scripts: list[ScriptOut] = []
+
+
+class BatchEstimateResponse(BaseModel):
+    total_jobs: int
+    estimated_seconds: float
+    based_on_historical_data: bool

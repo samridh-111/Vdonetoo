@@ -6,7 +6,11 @@ export interface CreateBatchPayload {
   name: string;
   translation_mode: TranslationMode;
   target_languages: string[];
-  translation_provider: "openai" | "gemini";
+  // Omit entirely to use whatever TRANSLATION_PROVIDER the backend's .env is
+  // configured with -- there's no UI picker for this yet, so never hardcode
+  // a value here (a prior version did, which silently ignored the
+  // backend's actual configured provider).
+  translation_provider?: "openai" | "gemini" | "mymemory";
   default_voice_map: Record<string, string>;
   concurrency_limit?: number;
 }
@@ -48,4 +52,16 @@ export async function getBatchStatus(batchId: string): Promise<BatchStatusOut> {
 
 export function getDownloadUrl(batchId: string): string {
   return `${API_URL}/api/v1/batch/${batchId}/download`;
+}
+
+export interface BatchEstimate {
+  total_jobs: number;
+  estimated_seconds: number;
+  based_on_historical_data: boolean;
+}
+
+export async function getBatchEstimate(scriptCount: number, languageCount: number): Promise<BatchEstimate> {
+  return apiFetch<BatchEstimate>(
+    `/api/v1/batch/estimate?script_count=${scriptCount}&language_count=${languageCount}`,
+  );
 }

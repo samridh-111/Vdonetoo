@@ -1,4 +1,3 @@
-import asyncio
 import io
 import time
 import uuid
@@ -23,6 +22,7 @@ from app.repositories import (
 )
 from app.workers.cancellation import is_batch_cancelled
 from app.workers.factories import get_storage_provider, get_voice_provider
+from app.workers.loop import run_async
 from app.workers.progress import publish_progress
 
 RATE_LIMIT_RETRY_COUNTDOWN = 2
@@ -54,11 +54,12 @@ def generate_audio_for_job(self: Any, job_id: str) -> dict[str, Any]:
        raising -- that's what guarantees the batch-wide chord callback
        still fires and the rest of the batch keeps going.
     """
-    if not try_acquire(get_sync_redis()):
+    settings = get_settings()
+    if not try_acquire(get_sync_redis(), "elevenlabs", settings.elevenlabs_max_concurrency):
         raise self.retry(countdown=RATE_LIMIT_RETRY_COUNTDOWN)
 
     try:
-        return asyncio.run(_generate_audio_async(job_id))
+        return run_async(_generate_audio_async(job_id))
     except _RetryableJobError as exc:
         raise self.retry(exc=exc.__cause__ or exc, countdown=FAILURE_RETRY_COUNTDOWN) from exc
 

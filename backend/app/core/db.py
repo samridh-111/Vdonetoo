@@ -9,7 +9,18 @@ from app.core.config import get_settings
 @lru_cache
 def get_engine() -> AsyncEngine:
     settings = get_settings()
-    return create_async_engine(settings.supabase_db_url, pool_pre_ping=True, pool_size=10)
+    return create_async_engine(
+        settings.supabase_db_url,
+        pool_pre_ping=True,
+        pool_size=10,
+        # Supabase's connection pooler (the "Transaction pooler" on port 6543)
+        # multiplexes physical connections per-transaction, which is
+        # incompatible with asyncpg's default prepared-statement caching --
+        # it raises DuplicatePreparedStatementError under any concurrent
+        # load. Disabling the statement cache is the standard fix when a
+        # pgbouncer-style transaction-mode pooler sits in front of asyncpg.
+        connect_args={"statement_cache_size": 0},
+    )
 
 
 @lru_cache

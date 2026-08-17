@@ -123,6 +123,8 @@ def get_batch_service(
         orchestrator=orchestrator,
         storage_provider=get_storage_provider(),
         batch_bucket=settings.supabase_batch_bucket,
+        default_translation_provider=settings.translation_provider,
+        elevenlabs_max_concurrency=settings.elevenlabs_max_concurrency,
     )
 
 

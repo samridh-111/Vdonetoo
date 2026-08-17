@@ -10,6 +10,7 @@ from app.schemas.batch import (
     BatchCreateRequest,
     BatchCreateResponse,
     BatchDetail,
+    BatchEstimateResponse,
     BatchIdRequest,
     BatchStatusOut,
     BatchSummary,
@@ -56,6 +57,16 @@ async def cancel_batch(request: BatchIdRequest, batch_service: BatchServiceDep) 
         raise HTTPException(409, str(exc)) from exc
 
     return BatchSummary(**asdict(batch))
+
+
+@router.get("/estimate", response_model=BatchEstimateResponse)
+async def estimate_batch(
+    batch_service: BatchServiceDep, script_count: int, language_count: int = 1
+) -> BatchEstimateResponse:
+    # Registered before /{batch_id} -- a static path must come first, or
+    # Starlette would match "estimate" as a batch_id (and fail UUID parsing)
+    # since path routing is structural, not type-aware.
+    return await batch_service.estimate(script_count, language_count)
 
 
 @router.get("/{batch_id}", response_model=BatchDetail)
